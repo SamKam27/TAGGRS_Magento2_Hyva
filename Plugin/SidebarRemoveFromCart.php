@@ -4,11 +4,9 @@ namespace Hyva\TaggrsDataLayer\Plugin;
 
 use Magento\Checkout\Controller\Sidebar\RemoveItem;
 use Magento\Customer\Model\Session;
-use Magento\Framework\App\ObjectManager;
 use Magento\Quote\Api\CartItemRepositoryInterface;
 use Magento\Quote\Api\Data\CartItemInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Psr\Log\LoggerInterface;
 use Taggrs\DataLayer\Api\DataLayerInterface;
 use Taggrs\DataLayer\Helper\ProductViewDataHelper;
 use Taggrs\DataLayer\Helper\UserDataHelper;
@@ -23,7 +21,6 @@ class SidebarRemoveFromCart implements DataLayerInterface
 
     private ProductViewDataHelper $productDataHelper;
 
-    private CartItemRepositoryInterface $cartItemRepository;
 
     private CheckoutSession $checkoutSession;
 
@@ -36,14 +33,12 @@ class SidebarRemoveFromCart implements DataLayerInterface
         Session                     $session,
         UserDataHelper              $userDataHelper,
         ProductViewDataHelper       $productDataHelper,
-        CartItemRepositoryInterface $cartItemRepository,
         CheckoutSession             $checkoutSession,
         StoreManagerInterface       $storeManager
     ) {
         $this->session = $session;
         $this->userDataHelper = $userDataHelper;
         $this->productDataHelper = $productDataHelper;
-        $this->cartItemRepository = $cartItemRepository;
         $this->checkoutSession = $checkoutSession;
         $this->storeManager = $storeManager;
     }
@@ -107,7 +102,6 @@ class SidebarRemoveFromCart implements DataLayerInterface
         return [
             'event' => $this->getEvent(),
             'ecommerce' => $this->getEcommerce(),
-
         ];
     }
 }

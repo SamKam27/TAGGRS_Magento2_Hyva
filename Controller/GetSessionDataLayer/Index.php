@@ -3,10 +3,7 @@
 namespace Hyva\TaggrsDataLayer\Controller\GetSessionDataLayer;
 
 use Magento\Framework\App\Action\HttpGetActionInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Psr\Log\LoggerInterface;
-use Taggrs\DataLayer\Helper\QuoteDataHelper;
 use Magento\Customer\Model\Session;
 
 class Index implements HttpGetActionInterface
@@ -17,7 +14,7 @@ class Index implements HttpGetActionInterface
     private JsonFactory $jsonFactory;
 
     /**
-     * @param QuoteDataHelper $quoteDataHelper
+     * @param Session $session
      * @param JsonFactory $jsonFactory
      */
     public function __construct(Session $session, JsonFactory $jsonFactory)

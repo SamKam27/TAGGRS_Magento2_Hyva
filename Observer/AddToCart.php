@@ -32,6 +32,7 @@ class AddToCart extends DataLayer implements ObserverInterface
      * @param ProductRepositoryInterface $productRepository
      * @param StoreManagerInterface $storeManager
      * @param UserDataHelper $userDataHelper
+     * @param CustomerSession $customerSession
      */
     public function __construct(
         CheckoutSession $checkoutSession,
@@ -67,9 +68,6 @@ class AddToCart extends DataLayer implements ObserverInterface
         try {
             $quote = $this->checkoutSession->getQuote();
         } catch (NoSuchEntityException|LocalizedException $e) {
-        }
-
-        if (!isset($quote)) {
             return [];
         }
 

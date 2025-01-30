@@ -4,102 +4,92 @@
 
 $baseUrl         = $block->getBaseUrl();
 $getDatalayerUrl = $baseUrl . 'hyva-taggrs-datalayer/getsessiondatalayer';
-$viewCartDataLayerUrl = $baseUrl . 'taggrs-datalayer/viewcart';
-?>
 
-<?php
 $script = <<<JS
-
 const getDataLayerUrl = '{$getDatalayerUrl}';
-const viewCartDataLayerUrl = '{$viewCartDataLayerUrl}';
 
 const { fetch: originalFetch } = window;
 window.fetch = async (...args) => {
     let [resource, config ] = args;
 
-
     const response = await originalFetch(resource, config);
 
+    // perform different actions based on characteristics of the fetch() request
     try {
         if (response.url.includes('checkout/sidebar/removeItem/')) {
-        fetch(getDataLayerUrl)
-          .then(response => {
-            if (! response.ok) console.warn('GET request failed');
-            return response.json()
-          })
-          .then(data => {
-              if (data !== null) {
-                taggrsPush(data, false);
-              }
-          })
-          .catch(error => {
-              console.log(error);
-          })
+            // remove from minicart
+            fetch(getDataLayerUrl)
+                .then(response => {
+                    if (! response.ok) {
+                        console.warn('GET request failed');
+                    }
+                    return response.json()
+                })
+               .then(data => {
+                  if (data !== null) {
+                    taggrsPush(data, false);
+                  }
+               })
+               .catch(error => {
+                   console.warn(error);
+               })
     } else if (response.url.includes('checkout.shipping.methods')) {
+        // selected shipping method
         taggrsAjaxEvent('addshippinginfo', () => {}, 1);
     } else if (response.url.includes('checkout.payment.methods')) {
+        // selected payment method
         taggrsAjaxEvent('addpaymentinfo', () => {}, 1);
     } else if (resource.includes('couponPost') && config.body.get('remove') === "0") {
-        taggrsAjaxEvent('selectpromotion', () => {}, 1);
+        // apply coupon code from cart page
+        taggrsAjaxEvent('selectpromotion');
     } else if (resource.includes('livewire/message/coupon-code')) {
+        // apply coupon code from checkout
         const payload = JSON.parse(config.body);
         for (let i = 0; i < payload.updates.length; i++ ) {
             const update = payload.updates[i];
             if (update.payload.method === "applyCouponCode") {
-                taggrsAjaxEvent('selectpromotion', () => {}, 1);
+                taggrsAjaxEvent('selectpromotion');
                 break;
             }
         }
     }
     } catch (error) {
-        console.log(error);
+        console.warn(error);
     }
-
 
     return response;
 };
 
-
-fetch(getDataLayerUrl)
-  .then(response => {
-            if (! response.ok) console.warn('GET request failed');
-            return response.json()
-  })
-  .then(data => {
-    if (data !== null) {
-      taggrsPush(data, false);
-    }
-  })
-  .catch(error => {
-    console.log(error);
-  });
-
-
-const cartToggle = document.querySelector('#menu-cart-icon');
-console.log(cartToggle, cartToggle instanceof Element);
-
-if (cartToggle instanceof Element) {
-    cartToggle.addEventListener('click', () => {
-        fetch(viewCartDataLayerUrl)
-  .then(response => {
-            if (! response.ok) console.warn('GET request failed');
-            return response.json()
-  })
-  .then(data => {
-    if (data !== null) {
-      taggrsPush(data, false);
-    }
-  })
-  .catch(error => {
-    console.log(error);
-  });
+// fetch data layer stored in session, on page load
+(function (  ) {
+    fetch(getDataLayerUrl)
+    .then(response => {
+        if (! response.ok)  {
+            console.warn('GET request failed')
+        }
+        return response.json()
     })
-}
+    .then(data => {
+        if (data !== null) {
+            taggrsPush(data, false);
+        }
+    })
+    .catch(error => {
+        console.warn(error);
+    });
+})();
 
-
+// toggle minicart --> view_cart DataLayer
+(function (  ) {
+    const cartToggle = document.querySelector('#menu-cart-icon');
+    if (cartToggle instanceof Element) {
+        cartToggle.addEventListener('click', () => {
+            taggrsAjaxEvent('viewcart', () => {}, 1);
+        })
+    }
+})();
 JS;
 ?>
-
 
 <?= /* @noEscape */
 $secureRenderer->renderTag( 'script', [ 'type' => 'text/javascript' ], $script, false ); ?>
