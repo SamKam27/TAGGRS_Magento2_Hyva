@@ -52,7 +52,6 @@ class SidebarRemoveFromCart implements DataLayerInterface
     {
         $request = $subject->getRequest();
         $quoteItemId = $request->getParam('item_id');
-        ObjectManager::getInstance()->get(LoggerInterface::class)->critical('REMOVED ITEM FROM SIDEBAR ' . $quoteItemId);
 
         if ($quoteItemId !== null) {
             foreach ($this->checkoutSession->getQuote()->getItems() as $quoteItem) {
