@@ -8,6 +8,11 @@
     "config": {
         "sort-packages": true
     },
+    "require": {
+        "magento/framework": "*",
+        "hyva-themes/magento2-compat-module-fallback": "*",
+        "taggrs/magento2-data-layer": "*"
+    },
     "autoload": {
         "files": [
             "registration.php"

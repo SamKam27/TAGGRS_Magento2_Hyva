@@ -1,4 +1,4 @@
-# Taggrs GTM DataLayer for Magento 2
+# Taggrs GTM DataLayer for Magento 2 with Hyvä theme
 This extension collect eccommerce data from Magento 2 and pushes it to the Google Tag Manager DataLayer.
 
 ## Installation
