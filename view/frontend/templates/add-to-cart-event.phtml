@@ -1,0 +1,105 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
+
+$baseUrl         = $block->getBaseUrl();
+$getDatalayerUrl = $baseUrl . 'hyva-taggrs-datalayer/getsessiondatalayer';
+$viewCartDataLayerUrl = $baseUrl . 'taggrs-datalayer/viewcart';
+?>
+
+<?php
+$script = <<<JS
+
+const getDataLayerUrl = '{$getDatalayerUrl}';
+const viewCartDataLayerUrl = '{$viewCartDataLayerUrl}';
+
+const { fetch: originalFetch } = window;
+window.fetch = async (...args) => {
+    let [resource, config ] = args;
+
+
+    const response = await originalFetch(resource, config);
+
+    try {
+        if (response.url.includes('checkout/sidebar/removeItem/')) {
+        fetch(getDataLayerUrl)
+          .then(response => {
+            if (! response.ok) console.warn('GET request failed');
+            return response.json()
+          })
+          .then(data => {
+              if (data !== null) {
+                taggrsPush(data, false);
+              }
+          })
+          .catch(error => {
+              console.log(error);
+          })
+    } else if (response.url.includes('checkout.shipping.methods')) {
+        taggrsAjaxEvent('addshippinginfo', () => {}, 1);
+    } else if (response.url.includes('checkout.payment.methods')) {
+        taggrsAjaxEvent('addpaymentinfo', () => {}, 1);
+    } else if (resource.includes('couponPost') && config.body.get('remove') === "0") {
+        taggrsAjaxEvent('selectpromotion', () => {}, 1);
+    } else if (resource.includes('livewire/message/coupon-code')) {
+        const payload = JSON.parse(config.body);
+        for (let i = 0; i < payload.updates.length; i++ ) {
+            const update = payload.updates[i];
+            if (update.payload.method === "applyCouponCode") {
+                taggrsAjaxEvent('selectpromotion', () => {}, 1);
+                break;
+            }
+        }
+    }
+    } catch (error) {
+        console.log(error);
+    }
+
+
+    return response;
+};
+
+
+fetch(getDataLayerUrl)
+  .then(response => {
+            if (! response.ok) console.warn('GET request failed');
+            return response.json()
+  })
+  .then(data => {
+    if (data !== null) {
+      taggrsPush(data, false);
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  });
+
+
+const cartToggle = document.querySelector('#menu-cart-icon');
+console.log(cartToggle, cartToggle instanceof Element);
+
+if (cartToggle instanceof Element) {
+    cartToggle.addEventListener('click', () => {
+        fetch(viewCartDataLayerUrl)
+  .then(response => {
+            if (! response.ok) console.warn('GET request failed');
+            return response.json()
+  })
+  .then(data => {
+    if (data !== null) {
+      taggrsPush(data, false);
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  });
+    })
+}
+
+
+JS;
+?>
+
+
+<?= /* @noEscape */
+$secureRenderer->renderTag( 'script', [ 'type' => 'text/javascript' ], $script, false ); ?>
