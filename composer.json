@@ -1,5 +1,6 @@
 {
     "name": "taggrs/magento2-hyva-data-layer",
+    "version": "v1.0.1",
     "description": "This extension makes the Taggrs_DataLayer extension compatible with the Hyva theme",
     "type": "magento2-module",
     "license": [
